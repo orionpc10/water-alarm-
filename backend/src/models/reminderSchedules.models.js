@@ -2,9 +2,10 @@ import mongoose, { Schema } from "mongoose";
 
 const timeFormatRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-//  Safely retrieves field values across Document (.save()) and Query (findOneAndUpdate) contexts.
-//  Handles partial updates by falling back to existing document values where possible.
-
+// 
+//   Safely retrieves field values across Document (.save()) and Query (findOneAndUpdate) contexts.
+//   Handles partial updates by falling back to existing document values where possible.
+//  
 const getField = (context, fieldName) => {
     if (!context) return undefined;
 
@@ -83,7 +84,7 @@ const reminderScheduleSchema = new Schema(
                         const reminderType = getField(this, "reminderType");
                         if (reminderType === "interval" && endTimeVal) {
                             const startTimeVal = getField(this, "startTime");
-                            
+
                             // Validate chronological order via native string comparison
                             if (startTimeVal && timeFormatRegex.test(startTimeVal) && timeFormatRegex.test(endTimeVal)) {
                                 return startTimeVal < endTimeVal;
