@@ -35,7 +35,7 @@ const userSchema = new Schema(
         timezone: {
             type: String,
             required: true,
-            default: "IST",
+            default: "UTC",
             trim: true,
         },
     },
