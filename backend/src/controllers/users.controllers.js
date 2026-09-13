@@ -69,28 +69,52 @@ export const deleteUserAccount = asyncHandler(async (req, res) => {
  * POST /api/webhooks/clerk
  * Handle incoming Clerk webhook events after verifying cryptographic signature.
  */
+
 export const handleClerkWebhook = asyncHandler(async (req, res) => {
     const signingSecret =
-        process.env.CLERK_WEBHOOK_SIGNING_SECRET || process.env.CLERK_WEBHOOK_SECRET;
+        process.env.CLERK_WEBHOOK_SIGNING_SECRET ||
+        process.env.CLERK_WEBHOOK_SECRET;
+
+    // console.log("\n========== CLERK WEBHOOK ==========");
+    // console.log("Headers:", req.headers);
+    // console.log("Body is Buffer:", Buffer.isBuffer(req.body));
+    // console.log("Body length:", req.body?.length);
+    // console.log("Signing secret exists:", !!signingSecret);
+    // console.log("Signing secret prefix:", signingSecret?.substring(0, 6));
 
     if (!signingSecret) {
         throw new apiError(
             500,
-            "Clerk webhook signing secret is not configured in environment variables"
+            "Clerk webhook signing secret is not configured"
         );
     }
 
     let evt;
+
     try {
         evt = await verifyWebhook(req, { signingSecret });
+
+        // console.log("Verification SUCCESS");
+        // console.log("Event type:", evt.type);
+        // console.log("Event user ID:", evt.data?.id);
+
     } catch (err) {
-        throw new apiError(400, `Clerk webhook signature verification failed: ${err.message}`);
+        console.error("Verification FAILED");
+        console.error(err);
+
+        throw new apiError(
+            400,
+            `Clerk webhook signature verification failed: ${err.message}`
+        );
     }
 
     const result = await usersService.syncUserFromClerk(evt);
 
-    return res
-        .status(200)
-        .json(new apiResponse(200, result, `Webhook '${evt.type}' processed successfully`));
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            result,
+            `Webhook '${evt.type}' processed successfully`
+        )
+    );
 });
-
